@@ -1,71 +1,44 @@
-import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
-import io.gitlab.arturbosch.detekt.Detekt
+import io.flax.kover.ColorBand.Companion.from
+import io.flax.kover.GitCommitOption.*
+import io.flax.kover.Style.*
 
 plugins {
-    alias(libs.plugins.kotlin) apply false
-    alias(libs.plugins.detekt)
-    alias(libs.plugins.ktlint)
-    alias(libs.plugins.versionCheck)
+    kotlin("jvm") version "1.9.0"
+    id("org.jetbrains.kotlinx.kover") version "0.7.3"
+    id("io.flax.kover-badge") version "0.0.1"
 }
 
-subprojects {
-    apply {
-        plugin(rootProject.libs.plugins.detekt.get().pluginId)
-        plugin(rootProject.libs.plugins.ktlint.get().pluginId)
-    }
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
 
-    ktlint {
-        debug.set(false)
-        verbose.set(true)
-        android.set(false)
-        outputToConsole.set(true)
-        ignoreFailures.set(false)
-        enableExperimentalRules.set(true)
-        filter {
-            exclude("**/generated/**")
-            include("**/kotlin/**")
+dependencies {
+    testImplementation(kotlin("test"))
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+
+koverReport {
+    defaults {
+        verify {
+            rule {
+                isEnabled = true
+                minBound(66)
+            }
+            onCheck = true
         }
     }
-
-    detekt {
-        config.setFrom(rootProject.files("config/detekt/detekt.yml"))
-    }
 }
 
-tasks.withType<Detekt>().configureEach {
-    reports {
-        html.required.set(true)
-        html.outputLocation.set(file("build/reports/detekt.html"))
-    }
-}
-
-tasks.withType<DependencyUpdatesTask> {
-    rejectVersionIf {
-        candidate.version.isNonStable()
-    }
-}
-
-fun String.isNonStable() = "^[0-9,.v-]+(-r)?$".toRegex().matches(this).not()
-
-tasks.register("clean", Delete::class.java) {
-    delete(rootProject.buildDir)
-}
-
-tasks.register("reformatAll") {
-    description = "Reformat all the Kotlin Code"
-
-    dependsOn("ktlintFormat")
-    dependsOn(gradle.includedBuild("kover-badge-plugin").task("ktlintFormat"))
-}
-
-tasks.register("preMerge") {
-    description = "Runs all the tests/verification tasks on both top level and included build."
-
-    dependsOn(":example:check")
-    dependsOn(gradle.includedBuild("kover-badge-plugin").task("check"))
-    dependsOn(gradle.includedBuild("kover-badge-plugin").task("validatePlugins"))
-}
-
-tasks.wrapper {
-    distributionType = Wrapper.DistributionType.ALL
+koverBadge {
+    badgeLabel.set("AExSZicVzC")
+    readme.set(file("TEST_README.md"))
+    badgeStyle.set(ForTheBadge)
+    spectrum.set(
+        listOf("red" from 0.0f, "yellow" from 33.33f, "gray" from 66.66f)
+    )
+    gitAction.set(Add)
 }

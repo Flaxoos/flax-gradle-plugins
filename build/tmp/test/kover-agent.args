@@ -1,0 +1,8 @@
+/private/var/folders/sk/5l863n2500v5fw7dm2ybqcc40000gn/T/16771250211602593864/build/kover/bin-reports/test.ic
+false
+false
+true
+false
+-exclude
+android\..*
+com\.android\..*
