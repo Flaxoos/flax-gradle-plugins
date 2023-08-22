@@ -1,12 +1,10 @@
-rootProject.name = "kover-badge-plugin-test"
-
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 pluginManagement {
     repositories {
         gradlePluginPortal()
         mavenCentral()
     }
 }
-
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
     repositories {
@@ -14,3 +12,20 @@ dependencyResolutionManagement {
         google()
     }
 }
+
+plugins {
+    `gradle-enterprise`
+}
+
+gradleEnterprise {
+    buildScan {
+        termsOfServiceUrl = "https://gradle.com/terms-of-service"
+        termsOfServiceAgree = "yes"
+        publishAlwaysIf(System.getenv("GITHUB_ACTIONS") == "true")
+        publishOnFailure()
+    }
+}
+
+rootProject.name = "flax-gradle-plugins"
+include(":test-project")
+includeBuild("kover-badge-plugin")
