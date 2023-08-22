@@ -16,7 +16,7 @@ jobs:
       - name: Cache Gradle Caches
         uses: gradle/gradle-build-action@v2
 
-      - name: Publish on Plugin Portal
+      - name: Publish to github packages
         env:
           GPR_TOKEN: ${{ secrets.GPR_TOKEN }}
           GPR_USER: ${{ env.GPR_USER }}
