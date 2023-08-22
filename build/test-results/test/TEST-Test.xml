@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="Test" tests="3" skipped="3" failures="0" errors="0" timestamp="2023-08-22T11:50:48" hostname="Idos-Fancy-Mac.fritz.box" time="0.002">
+<testsuite name="Test" tests="3" skipped="3" failures="0" errors="0" timestamp="2023-08-22T11:50:52" hostname="Idos-Fancy-Mac.fritz.box" time="0.001">
   <properties/>
-  <testcase name="test1()" classname="Test" time="0.001">
+  <testcase name="test1()" classname="Test" time="0.0">
     <skipped/>
   </testcase>
   <testcase name="test2()" classname="Test" time="0.0">
