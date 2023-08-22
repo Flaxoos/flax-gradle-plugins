@@ -1,0 +1,35 @@
+import io.flax.kover.ColorBand.Companion.from
+import io.flax.kover.GitCommitOption.*
+import io.flax.kover.Style.*
+
+plugins {
+    kotlin("jvm") version "1.9.0"
+    $KOVER_PLUGIN
+    id("io.flax.kover-badge") version "0.0.1"
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation(kotlin("test"))
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+
+$KOVER_REPORT
+
+koverBadge {
+    badgeLabel.set($BADGE_LABEL)
+    readme.set(file($README_FILE_PATH))
+    badgeStyle.set($BADGE_STYLE)
+    spectrum.set(
+        $SPECTRUM
+    )
+    gitAction.set($GIT_ACTION)
+    ciDetection.set { $IS_CI }
+}
