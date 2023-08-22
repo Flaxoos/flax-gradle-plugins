@@ -1,15 +1,21 @@
 package io.flax.kover
 
+import com.github.syari.kgit.KGit
 import io.flax.kover.ColorBand.Companion.from
+import io.flax.kover.KoverBadgeTask.Regexes.coverageRegex
 import io.flax.kover.Names.KOVER_BADGE_DEFAULT_LABEL
 import io.flax.kover.Names.KOVER_BADGE_EXTENSION_NAME
 import io.flax.kover.Names.KOVER_BADGE_TASK_GROUP_NAME
 import io.flax.kover.Names.KOVER_BADGE_TASK_NAME
+import kotlinx.css.Color
 import kotlinx.kover.gradle.plugin.KoverGradlePlugin
 import kotlinx.kover.gradle.plugin.dsl.koverHtmlReportName
 import kotlinx.kover.gradle.plugin.dsl.koverLogName
+import org.eclipse.jgit.lib.RepositoryBuilder
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
@@ -17,7 +23,6 @@ import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.findPlugin
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
-import org.gradle.process.ExecSpec
 import java.io.File
 import javax.inject.Inject
 
@@ -31,92 +36,137 @@ object Names {
 /**
  * Plugin for embedding a badge in the project's readme for test coverage from [kotlinx.kover.gradle.plugin.KoverGradlePlugin]
  */
+@Suppress("TooGenericExceptionCaught")
 class KoverBadgePlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        with(project) {
-            val extension = extensions.create(KOVER_BADGE_EXTENSION_NAME, KoverBadgePluginExtension::class.java)
-            if (project.plugins.findPlugin(KoverGradlePlugin::class) == null) {
-                logger.warn("Kover plugin not applied, kover-badge plugin has nothing to do")
-                return@with
-            }
-            project.plugins.withType(KoverGradlePlugin::class) {
-                val koverLogTask = tasks.getByName(tasks.koverLogName)
-                val koverHtmlReportTask = tasks.getByName(tasks.koverHtmlReportName)
+        try {
+            with(project) {
+                val extension = extensions.create(KOVER_BADGE_EXTENSION_NAME, KoverBadgePluginExtension::class.java)
+                if (project.hasNoKoverApplied()) {
+                    logger.info("Kover plugin not applied, kover-badge plugin has nothing to do")
+                    return@with
+                }
+                project.plugins.withType(KoverGradlePlugin::class) {
+                    tasks.register(KOVER_BADGE_TASK_NAME, KoverBadgeTask::class) {
+                        val koverLogTask = tasks.find { it.name.contains(tasks.koverLogName) }
+                            ?: error("No ${tasks.koverLogName} task found")
+                        val koverHtmlReportTask = tasks.find { it.name.contains(tasks.koverHtmlReportName) }
 
-                tasks.register(KOVER_BADGE_TASK_NAME, KoverBadgeTask::class) {
-                    group = KOVER_BADGE_TASK_GROUP_NAME
-                    dependsOn(koverLogTask, koverHtmlReportTask)
-                    mustRunAfter(koverLogTask, koverHtmlReportTask)
-                    koverLogResultFile.set(koverLogTask.outputs.files.singleFile)
-                    koverHtmlReportTask.outputs.files.singleFile.let {
-                        if (it.exists()) koverHtmlReportDir.set(it)
-                    }
+                        group = KOVER_BADGE_TASK_GROUP_NAME
+                        dependsOn(koverLogTask, koverHtmlReportTask)
+                        mustRunAfter(koverLogTask, koverHtmlReportTask)
 
-                    readme.set(extension.readme)
-                    badgeLabel.set(extension.badgeLabel.map { badgeContent ->
-                        if (badgeContent.contains("_")) {
-                            badgeContent.replace(" ", "-")
-                                .also { logger.warn("spaces are not allowed in in badges, replaced with dash") }
-                        } else badgeContent
-                    })
-                    badgeStyle.set(extension.badgeStyle)
-                    spectrum.set(extension.spectrum)
+                        setConditions(koverLogTask)
 
-                    doLast {
-                        logger.quiet("Running KoverBadgeTask")
-
-                        if (!extension.ciDetection.get().detect(project)) {
-                            extension.handleGitCommitOption(this@register, this@with)
+                        setInputs(koverLogTask, koverHtmlReportTask, extension)
+                        doLast {
+                            if (!extension.ciDetection.get().detect(project)) {
+                                extension.handleGitCommitOption(this@register, this@with)
+                            }
                         }
                     }
                 }
             }
+        } catch (e: Exception) {
+            project.logger.error("Unexpected error: ${e.message}, please report this issue")
+            throw e
         }
     }
 
+    private fun KoverBadgeTask.setConditions(koverLogTask: Task) {
+        onlyIf("${koverLogTask.name} has an output file containing pattern: \"${coverageRegex.pattern}\"") {
+            val koverLogTaskOutputFile = koverLogTask.outputs.files.singleFile
+            logger.info("${koverLogTask.name} output file content:\n${koverLogTaskOutputFile.readText()}")
+            koverLogTask.outputs.files.singleFile.readText().contains(coverageRegex)
+        }
+    }
+
+    private fun KoverBadgeTask.setInputs(
+        koverLogTask: Task,
+        koverHtmlReportTask: Task?,
+        extension: KoverBadgePluginExtension,
+    ) {
+        fun <T> T?.logIfNull(message: String) = also {
+            if (this == null) {
+                logger.quiet("$message: is null")
+            }
+        }
+        coverageLogFile.set(koverLogTask.outputs.files.singleFile)
+
+        koverHtmlReportTask.logIfNull("koverHtmlReportTask")
+            ?.outputs.logIfNull("koverHtmlReportTask.outputs")
+            ?.files.logIfNull("koverHtmlReportTask.outputs.files")
+            ?.singleFile.logIfNull("koverHtmlReportTask.outputs.files.singleFile")
+            ?.let { coverageHtmlReportDir.set(it) }
+        readme.set(extension.readme)
+        badgeLabel.set(extension.badgeLabel)
+        badgeStyle.set(extension.badgeStyle)
+        spectrum.set(extension.spectrum)
+    }
+
+    @Suppress("NestedBlockDepth", "TooGenericExceptionCaught")
     private fun KoverBadgePluginExtension.handleGitCommitOption(
         koverBadgeTask: KoverBadgeTask,
         project: Project,
     ) {
         when (val option = this.gitAction.get()) {
-            is GitCommitOptions.DontCommit -> {}
+            is GitCommitOption.DontCommit -> {}
+            else -> {
+                try {
+                    val gitDir =
+                        this@handleGitCommitOption.gitRepositoryDirectory
+                            .getOrElse(project.layout.projectDirectory.dir(".git"))
 
-            is GitCommitOptions.Add,
-            is GitCommitOptions.CommitReadme,
-            is GitCommitOptions.Commit,
-            is GitCommitOptions.CommitToNewBranch -> {
-                fun ExecSpec.git(vararg args: String) {
-                    try {
-                        commandLine("git", *args)
-                    } catch (e: Exception) {
-                        project.logger.error("Failed to run git command", e)
+                    val repoBuilder = RepositoryBuilder().setWorkTree(project.projectDir).setGitDir(gitDir.asFile)
+                    if (!repoBuilder.readEnvironment().findGitDir().gitDir.exists()) {
+                        project.logger.warn("No .git dir found at: $gitDir, skipping git commit")
+                        return
                     }
-                }
 
-                val filesToStage = when (option) {
-                    is GitCommitOptions.CommitReadme -> listOf(koverBadgeTask.readme.get().asFile.absolutePath)
-                    else -> listOf("--all")
-                }
+                    val git = KGit(repoBuilder.build())
 
-                project.exec {
-                    git("add", *filesToStage.toTypedArray())
-                }
+                    val filePattern = when (option) {
+                        is GitCommitOption.CommitReadme ->
+                            koverBadgeTask.readme.get().asFile.relativeTo(project.projectDir).path
 
-                if (option is GitCommitOptions.CommitOption) {
-                    if (option is GitCommitOptions.CommitToNewBranch) {
-                        project.exec {
-                            git("checkout", "-b", option.branchName)
+                        else -> "."
+                    }
+
+                    git.add {
+                        addFilepattern(filePattern)
+                    }
+
+                    if (option is GitCommitOption.CommitOption) {
+                        if (option is GitCommitOption.CommitToNewBranch) {
+                            git.checkout {
+                                setName(option.branchName)
+                                setCreateBranch(true)
+                            }
+                        }
+                        val message = option.message(this)
+                        git.commit {
+                            if (GitCommitOption::class == GitCommitOption.CommitReadme::class) {
+                                this.setOnly(
+                                    readme.get().asFile.relativeTo(
+                                        project.projectDir,
+                                    ).path,
+                                )
+                            }
+                            this.message = message
                         }
                     }
-                    val message = option.message(this)
-                    project.exec {
-                        git("commit", "-m", message)
-                    }
+                } catch (e: Exception) {
+                    project.logger.error("Git commit option ${option::class.simpleName} failed: ${e.localizedMessage}")
+                    throw e
                 }
             }
         }
     }
 }
+
+private const val DEFAULT_LOWER_BAND_THRESHOLD = 0.0f
+private const val DEFAULT_MID_BAND_THRESHOLD = 50.0f
+private const val DEFAULT_UPPER_BAND_THRESHOLD = 100.0f
 
 /**
  * Extension for [KoverBadgePlugin]
@@ -145,9 +195,10 @@ open class KoverBadgePluginExtension @Inject constructor(objects: ObjectFactory)
      * the corresponding color will be used for the right side of the badge.
      * Default is red, yellow, green and 0, 50, 95, respectively.
      *
-     * Note: Kover plugin and task configuration are internal, so there is no way to get the bounds set for any verify rules,
-     * Therefor, the user must make sure the top color band threshold matches the bounds set in their rules, if they want
-     * the badge to reflect the rules
+     * Note: Kover plugin and task configuration are internal,
+     * so there is no way to get the bounds set for any verify rules.
+     * Therefor, the user must make sure the top color band threshold matches the bounds set in their rules,
+     * if they want the badge to reflect the rules
      *
      * Can be initialized with the following DSL:
      * ```
@@ -161,18 +212,23 @@ open class KoverBadgePluginExtension @Inject constructor(objects: ObjectFactory)
      */
     val spectrum: ListProperty<ColorBand> = objects.listProperty(ColorBand::class.java).convention(
         listOf(
-            "red" from 0.0f,
-            "yellow" from 50.0f,
-            "green" from 95.0f
-        )
+            Color.red from DEFAULT_LOWER_BAND_THRESHOLD,
+            Color.yellow from DEFAULT_MID_BAND_THRESHOLD,
+            Color.green from DEFAULT_UPPER_BAND_THRESHOLD,
+        ),
     )
+
+    /**
+     * The directory where the git repository is, if not specified, defaults to the project root
+     */
+    val gitRepositoryDirectory: DirectoryProperty = objects.directoryProperty()
 
     /**
      * What git action should the task perform with the changes to the readme file
      * This option is only used if the task is not being executed within a CI/CD environment, as defined by the provided [ciDetection]
      */
-    val gitAction: Property<GitCommitOptions> =
-        objects.property(GitCommitOptions::class.java).convention(GitCommitOptions.Add)
+    val gitAction: Property<GitCommitOption> =
+        objects.property(GitCommitOption::class.java).convention(GitCommitOption.Add)
 
     /**
      * Mechanism for determining if the task is being executed within a CI/CD environment.
@@ -187,19 +243,19 @@ open class KoverBadgePluginExtension @Inject constructor(objects: ObjectFactory)
 /**
  * Options for specifying the Git operations to perform after updating the README.
  */
-sealed class GitCommitOptions {
+sealed class GitCommitOption {
     /**
      * Do not perform any Git operations after updating the README.
      */
-    object DontCommit : GitCommitOptions()
+    object DontCommit : GitCommitOption()
 
     /**
      * Stage (add) the README to the Git index, but do not commit it.
      * Useful if there are additional changes that should be included in a single commit.
      */
-    object Add : GitCommitOptions()
+    object Add : GitCommitOption()
 
-    sealed class CommitOption : GitCommitOptions() {
+    sealed class CommitOption : GitCommitOption() {
         abstract val message: KoverBadgePluginExtension.() -> String
     }
 
@@ -224,7 +280,7 @@ sealed class GitCommitOptions {
      */
     data class CommitToNewBranch(
         override val message: KoverBadgePluginExtension.() -> String = defaultCommitMessage,
-        val branchName: String
+        val branchName: String,
     ) : CommitOption()
 
     companion object {
@@ -241,3 +297,4 @@ fun interface CiDetection {
     fun detect(project: Project): Boolean
 }
 
+private fun Project.hasNoKoverApplied() = this.plugins.findPlugin(KoverGradlePlugin::class) == null

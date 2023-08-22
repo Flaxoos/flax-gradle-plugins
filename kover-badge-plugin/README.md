@@ -1,8 +1,8 @@
 # Kover Badge Plugin
 
-[![Pre Merge Checks](https://github.com/idoflax/kover-badge-plugin/kotlin-gradle-plugin-template/workflows/Pre%20Merge%20Checks/badge.svg)](https://github.com/idoflax/kover-badge-plugin/actions?query=workflow%3A%22Pre+Merge+Checks%22)
-[![License](https://img.shields.io/github/license/idoflax/kover-badge-plugin/kotlin-android-template.svg)](../LICENSE)
-![Language](https://img.shields.io/github/languages/top/idoflax/kover-badge-plugin/kotlin-android-template?color=blue&logo=kotlin)
+![Pre Merge Checks](https://github.com/idoflax/flax-gradle-plugins/actions/workflows/pre-merge.yaml/badge.svg)
+![Language](https://img.shields.io/github/languages/top/idoflax/flax-gradle-plugins?color=blue&logo=kotlin)
+<a>![koverage](https://img.shields.io/badge/49.20-green?logo=kotlin&label=koverage&style=plastic&link=file:/Users/ido/IdeaProjects/kotlin-gradle-plugin-template/test-project/build/reports/kover/html/)</a>
 
 The KoverBadgePlugin is a Gradle plugin designed to embed a badge in the project's readme, showcasing test coverage from
 the Kover Gradle Plugin. This badge is generated using the https://shields.io/badges service.
@@ -18,7 +18,7 @@ plugins {
 ```
 - Create a readme file
 
-- Add this where you want the badge to appear `<a>![koverage]()</a>`
+- Add this where you want the badge to appear `<a>![your-badge-name]()</a>`
 
 - Configure the extension:
 
@@ -44,7 +44,7 @@ Execute the task:
 
 Then you'll see something like this:
 
-<a>![koverage](https://img.shields.io/badge/95.0-green?logo=kotlin&label=your-badge-label&style=plastic&link=file:/Users/ido/IdeaProjects/kotlin-gradle-plugin-template/test-project/build/reports/kover/html/)</a>
+<a>![your-badge-label](https://img.shields.io/badge/95.0-green?logo=kotlin&label=your-badge-label&style=plastic&link=file:/Users/ido/IdeaProjects/kotlin-gradle-plugin-template/test-project/build/reports/kover/html/)</a>
 
 Clicking on it will forward to your kover html report, if one exists
 ### Configuration Options (see kdocs for further information):

@@ -1,4 +1,5 @@
 import io.flax.kover.ColorBand.Companion.from
+import io.flax.kover.GitCommitOption.*
 import io.flax.kover.Style
 
 plugins {
@@ -8,7 +9,6 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.kotlinx.coroutines.core)
     testImplementation(libs.kotest.junit5)
     testImplementation(libs.mockk)
 }
@@ -42,7 +42,7 @@ koverBadge {
         listOf(
             "red" from 0.0f,
             "yellow" from 50.0f,
-            "green" from 90.0f
-        )
+            "green" from 90.0f,
+        ),
     )
 }

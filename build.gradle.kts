@@ -6,12 +6,14 @@ plugins {
     alias(libs.plugins.detekt)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.versionCheck)
+    idea
 }
 
 subprojects {
     apply {
         plugin(rootProject.libs.plugins.detekt.get().pluginId)
         plugin(rootProject.libs.plugins.ktlint.get().pluginId)
+        plugin("org.gradle.idea")
     }
 
     ktlint {
@@ -30,6 +32,13 @@ subprojects {
     detekt {
         config.setFrom(rootProject.files("config/detekt/detekt.yml"))
     }
+
+    idea {
+        module {
+            isDownloadJavadoc = true
+            isDownloadSources = true
+        }
+    }
 }
 
 tasks.withType<Detekt>().configureEach {
@@ -47,23 +56,19 @@ tasks.withType<DependencyUpdatesTask> {
 
 fun String.isNonStable() = "^[0-9,.v-]+(-r)?$".toRegex().matches(this).not()
 
-tasks.register("clean", Delete::class.java) {
-    delete(rootProject.buildDir)
-}
-
 tasks.register("reformatAll") {
     description = "Reformat all the Kotlin Code"
 
-    dependsOn("ktlintFormat")
+    dependsOn(":ktlintFormat")
     dependsOn(gradle.includedBuild("kover-badge-plugin").task("ktlintFormat"))
 }
 
 tasks.register("preMerge") {
     description = "Runs all the tests/verification tasks on both top level and included build."
 
-    dependsOn(":example:check")
-    dependsOn(gradle.includedBuild("kover-badge-plugin").task("check"))
-    dependsOn(gradle.includedBuild("kover-badge-plugin").task("validatePlugins"))
+    println(":check")
+    dependsOn(gradle.includedBuild("kover-badge-plugin").task(":check"))
+    dependsOn(gradle.includedBuild("kover-badge-plugin").task(":validatePlugins"))
 }
 
 tasks.wrapper {

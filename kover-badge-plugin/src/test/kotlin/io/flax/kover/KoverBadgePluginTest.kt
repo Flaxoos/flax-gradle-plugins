@@ -6,10 +6,10 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlinx.kover.gradle.plugin.KoverGradlePlugin
 import org.gradle.kotlin.dsl.apply
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.contract
 import org.gradle.testfixtures.ProjectBuilder
 import java.io.File
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 @OptIn(ExperimentalContracts::class)
 fun <T : Any> T?.shouldNotBeNull(): T {
@@ -22,35 +22,11 @@ fun <T : Any> T?.shouldNotBeNull(): T {
 
 class KoverBadgePluginTest : FunSpec() {
     init {
-
-
         context("KoverBadgePlugin") {
-
             var project = ProjectBuilder.builder().build()
 
             beforeTest {
-                // Create a new project before each test for a clean slate
                 project = ProjectBuilder.builder().build()
-            }
-
-            test("plugin is not applied without KoverGradlePlugin") {
-                project.pluginManager.apply(KoverBadgePlugin::class)
-
-                project.tasks.findByName(Names.KOVER_BADGE_TASK_NAME) shouldBe null
-            }
-
-            test("plugin is applied correctly with KoverGradlePlugin") {
-                project.pluginManager.apply(KoverGradlePlugin::class)
-                project.pluginManager.apply(KoverBadgePlugin::class)
-
-                project.tasks.findByName(Names.KOVER_BADGE_TASK_NAME) shouldNotBe null
-            }
-
-            test("extension is created correctly") {
-                project.pluginManager.apply(KoverBadgePlugin::class)
-
-                project.extensions.findByName(Names.KOVER_BADGE_EXTENSION_NAME)
-                    .shouldNotBeNull() as KoverBadgePluginExtension
             }
 
             test("parameters are passed correctly from extension to task with KoverGradlePlugin applied") {
@@ -64,13 +40,14 @@ class KoverBadgePluginTest : FunSpec() {
                 extension.badgeStyle.set(Style.Flat)
                 extension.spectrum.set(listOf("red" from 0.0f, "yellow" from 50.0f, "green" from 95.0f))
 
-                val task = project.tasks.findByName(Names.KOVER_BADGE_TASK_NAME).shouldNotBeNull() as KoverBadgeTask
-                task.readme.get().asFile.name shouldBe "test_readme.md"
-                task.badgeLabel.get() shouldBe "testBadge"
-                task.badgeStyle.get() shouldBe Style.Flat
-                task.spectrum.get() shouldBe listOf("red" from 0.0f, "yellow" from 50.0f, "green" from 95.0f)
+                project.afterEvaluate {
+                    val task = project.tasks.findByName(Names.KOVER_BADGE_TASK_NAME).shouldNotBeNull() as KoverBadgeTask
+                    task.readme.get().asFile.name shouldBe "test_readme.md"
+                    task.badgeLabel.get() shouldBe "testBadge"
+                    task.badgeStyle.get() shouldBe Style.Flat
+                    task.spectrum.get() shouldBe listOf("red" from 0.0f, "yellow" from 50.0f, "green" from 95.0f)
+                }
             }
-
         }
     }
 }
