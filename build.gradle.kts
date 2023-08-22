@@ -34,11 +34,11 @@ koverReport {
 }
 
 koverBadge {
-    badgeLabel.set("pIHTAxWyDe")
+    badgeLabel.set("zAhOiQjaxd")
     readme.set(file("TEST_README.md"))
     badgeStyle.set(ForTheBadge)
     spectrum.set(
         listOf("red" from 0.0f, "yellow" from 33.33f, "gray" from 66.66f)
     )
-    gitAction.set(Commit())
+    gitAction.set(CommitToNewBranch(branchName = "new-branch"))
 }
