@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  gradle:
+  publish-plugin:
     runs-on: ubuntu-latest
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     steps:
@@ -20,4 +20,4 @@ jobs:
         env:
           GPR_TOKEN: ${{ secrets.GPR_TOKEN }}
           GPR_USER: ${{ env.GPR_USER }}
-        run: ./gradlew :kover-badge-plugin:publish
+        run: ./gradlew test-projects:kover-badge-plugin:acceptPlugin :kover-badge-plugin:publish
