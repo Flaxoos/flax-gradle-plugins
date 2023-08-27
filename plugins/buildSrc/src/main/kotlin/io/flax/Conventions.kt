@@ -1,5 +1,6 @@
 package io.flax
 
+import com.gradle.publish.PublishPlugin
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
 import kotlinx.kover.gradle.plugin.dsl.KoverReportExtension
@@ -11,6 +12,7 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.JvmTestSuitePlugin
 import org.gradle.api.plugins.catalog.VersionCatalogPlugin
 import org.gradle.api.plugins.jvm.JvmTestSuite
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.publish.PublishingExtension
@@ -19,6 +21,7 @@ import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.wrapper.Wrapper
+import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.register
@@ -39,6 +42,7 @@ const val FUNCTIONAL_TEST_SUITE_NAME = "functionalTest"
 
 abstract class ConventionExtension @Inject constructor(objectFactory: ObjectFactory) {
     val minimunCoverage: Property<Int> = objectFactory.property(Int::class.java).convention(90)
+    val pluginTags: ListProperty<String> = objectFactory.listProperty(String::class.java)
 }
 
 @Suppress("UnstableApiUsage")
@@ -48,16 +52,17 @@ open class Conventions : Plugin<Project> {
             with(plugins) {
                 apply(project.plugin("kotlin"))
                 apply("org.gradle.kotlin.kotlin-dsl")
-                apply(JavaGradlePluginPlugin::class.java)
-                apply(VersionCatalogPlugin::class.java)
-                apply(JvmTestSuitePlugin::class.java)
-                apply(MavenPublishPlugin::class.java)
+                apply(JavaGradlePluginPlugin::class)
+                apply(VersionCatalogPlugin::class)
+                apply(JvmTestSuitePlugin::class)
+                apply(MavenPublishPlugin::class)
+                apply(PublishPlugin::class)
                 apply(project.plugin("detekt"))
                 apply(project.plugin("ktlint"))
                 apply(project.plugin("versionCheck"))
                 apply(project.plugin("kotlinxKover"))
             }
-            project.extensions.create("conventions", ConventionExtension::class.java)
+            val extenstion = project.extensions.create("conventions", ConventionExtension::class.java)
 
             group = "io.flax"
 
@@ -79,12 +84,13 @@ open class Conventions : Plugin<Project> {
 
             setupTestSuites()
 
-                configureKover()
+            configureKover()
 
-                configureKtlint()
+            configureKtlint()
 
             configureDetekt()
 
+            afterEvaluate {
                 setupGradlePlugin(
                     testSourceSets = the<TestingExtension>().suites.let { testSuites ->
                         listOf(FUNCTIONAL_TEST_SUITE_NAME).map { testSuiteName ->
@@ -92,9 +98,11 @@ open class Conventions : Plugin<Project> {
                         }
                     },
                     name = project.name,
+                    tags = extenstion.pluginTags.get().toTypedArray()
                 )
+            }
 
-                setupPublishing(project)
+            setupPublishing(project)
         }
     }
 }
@@ -173,10 +181,9 @@ fun Project.setupGradlePlugin(name: String, testSourceSets: List<Provider<Source
             create("$group.$name") {
                 id = property("ID").toString()
                 implementationClass = property("IMPLEMENTATION_CLASS").toString()
-                version = property("VERSION").toString()
                 description = property("DESCRIPTION").toString()
                 displayName = property("DISPLAY_NAME").toString()
-                this.tags.set(listOf(*tags))
+                this.tags.set(tags.toList())
             }
         }
         testSourceSets(*testSourceSets.map { it.get() }.toTypedArray())
@@ -217,7 +224,7 @@ private fun Project.configureKtlint() {
 }
 
 private fun Project.configureDetekt() {
-    the<DetektExtension>().apply{
+    the<DetektExtension>().apply {
         config.from(files(rootDir.parentFile.resolve("config/detekt/detekt.yml")))
     }
     tasks.named("build") {

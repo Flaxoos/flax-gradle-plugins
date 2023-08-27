@@ -22,6 +22,7 @@ dependencies {
     implementation(libs.ktlint.gradlePlugin)
     implementation(libs.detekt.gradlePlugin)
     implementation(libs.version.gradlePlugin)
+    implementation(libs.gradlePublishPlugin.gradlePlugin)
 
     testImplementation(libs.mockk)
 }

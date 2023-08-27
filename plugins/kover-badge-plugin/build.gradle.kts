@@ -1,4 +1,5 @@
 import io.flax.FUNCTIONAL_TEST_SUITE_NAME
+import io.flax.plugin
 
 plugins {
     id("conventions")
@@ -25,4 +26,5 @@ koverGradleTestKit {
 conventions {
     // overriding the convention, until koverGradleTestKit works properly
     minimunCoverage.set(40)
+    pluginTags.set(listOf("kover", "badge", "shields", "shields.io", "coverage", "kotlin"))
 }

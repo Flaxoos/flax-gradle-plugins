@@ -4,7 +4,7 @@ kotlin = "1.9.0"
 java = "11"
 gradle = "8.2.1"
 kotlin-gradleDsl = "4.0.14"
-
+gradlePublishPlugin = "1.2.1"
 # Testing tools
 kotest = "5.6.2"
 mockk = "1.11.0"
@@ -59,7 +59,7 @@ kover-gradlePlugin = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", ver
 atomicfu-gradlePlugin = { module = "org.jetbrains.kotlinx:atomicfu-gradle-plugin", version.ref = "atomicFu" }
 detekt-gradlePlugin = { module =  "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 version-gradlePlugin = { module = "com.github.ben-manes:gradle-versions-plugin", version.ref = "versionCheck" }
-
+gradlePublishPlugin-gradlePlugin = { module = "com.gradle.publish:plugin-publish-plugin", version.ref = "gradlePublishPlugin"}
 # Other libraries
 kotlinCssLib = { module = "org.jetbrains.kotlin-wrappers:kotlin-css", version.ref = "kotlin-css" }
 konform = { module = "io.konform:konform", version.ref = "konform" }
