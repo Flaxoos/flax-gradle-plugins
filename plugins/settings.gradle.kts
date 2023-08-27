@@ -1,15 +1,21 @@
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 pluginManagement {
     repositories {
         gradlePluginPortal()
         mavenCentral()
     }
 }
+
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
     repositories {
-        mavenCentral()
         google()
+        mavenCentral()
+    }
+
+    versionCatalogs {
+        create("libs") {
+            from(files("../gradle/libs.versions.toml"))
+        }
     }
 }
 
@@ -26,6 +32,6 @@ gradleEnterprise {
     }
 }
 
-rootProject.name = "flax-gradle-plugins"
-include(":test-projects:kover-badge-plugin")
-includeBuild("plugins")
+rootProject.name = "plugins"
+include(":kover-badge-plugin")
+include(":common")
