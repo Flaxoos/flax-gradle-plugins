@@ -22,6 +22,18 @@ jobs:
       - name: Cache Gradle Caches
         uses: gradle/gradle-build-action@v2
 
+      - name: Verify Secret Values
+        env:
+          GPR_USER: ${{ env.GPR_USER }}
+          GPR_TOKEN: ${{ secrets.GPR_TOKEN }}
+          GRADLE_PUBLISH_KEY: ${{ env.GRADLE_PUBLISH_KEY }}
+          GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}
+        run: |
+          echo "Secret values verification:"
+          echo "GRADLE_PUBLISH_KEY: $GRADLE_PUBLISH_KEY"
+          echo "GRADLE_PUBLISH_SECRET: $GRADLE_PUBLISH_SECRET"
+          echo "::set-env name=SECRET_VALUES_VERIFIED::true"
+
       - name: Validate Plugin with Gradle
         env:
           GRADLE_PUBLISH_KEY: ${{ env.GRADLE_PUBLISH_KEY }}
