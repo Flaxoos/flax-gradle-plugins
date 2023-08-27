@@ -19,5 +19,5 @@ jobs:
       - name: Cache Gradle Caches
         uses: gradle/gradle-build-action@v2
 
-      - name: Run Gradle tasks
-        run: ./gradlew test-projects:kover-badge-plugin:acceptPlugin test-projects:kover-badge-plugin:publishPlugins --validate-only
+      - name: Validate Plugin with Gradle
+        run: ./gradlew test-projects:kover-badge-plugin:acceptPlugin :plugins:kover-badge-plugin:publishPlugins --validate-only --stacktrace
