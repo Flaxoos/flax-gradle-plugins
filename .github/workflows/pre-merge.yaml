@@ -10,6 +10,9 @@ on:
 
 jobs:
   check-plugin:
+    env:
+      GRADLE_PUBLISH_KEY: ${{ env.GRADLE_PUBLISH_KEY }}
+      GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}
     runs-on: ubuntu-latest
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     steps:
@@ -22,16 +25,5 @@ jobs:
       - name: Cache Gradle Caches
         uses: gradle/gradle-build-action@v2
 
-      - name: Print Environment Variables
-        env:
-          GRADLE_PUBLISH_KEY: ${{ env.GRADLE_PUBLISH_KEY }}
-          GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}
-        run: |
-          echo "GRADLE_PUBLISH_KEY: $GRADLE_PUBLISH_KEY"
-          echo "GRADLE_PUBLISH_SECRET: $GRADLE_PUBLISH_SECRET"
-
       - name: Validate Plugin with Gradle
-        env:
-          GRADLE_PUBLISH_KEY: ${{ env.GRADLE_PUBLISH_KEY }}
-          GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}
         run: ./gradlew test-projects:kover-badge-plugin:acceptPlugin :plugins:kover-badge-plugin:publishPlugins --validate-only --stacktrace
