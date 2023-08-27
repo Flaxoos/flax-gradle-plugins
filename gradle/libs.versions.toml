@@ -7,7 +7,7 @@ kotlin-gradleDsl = "4.0.14"
 gradlePublishPlugin = "1.2.1"
 # Testing tools
 kotest = "5.6.2"
-mockk = "1.11.0"
+mockk = "1.13.7"
 
 # Asynchronous and concurrent programming
 atomicFu = "0.21.0"
