@@ -40,3 +40,6 @@ out/
 
 ### act ###
 .actrc
+
+### local ###
+.DS_Store
