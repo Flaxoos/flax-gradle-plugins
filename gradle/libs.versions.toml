@@ -11,7 +11,7 @@ mockk = "1.11.0"
 
 # Asynchronous and concurrent programming
 atomicFu = "0.21.0"
-kotlinx_coroutines = "1.7.2"
+kotlinx_coroutines = "1.7.3"
 
 # Code quality tools
 ktlint = "11.5.1"
