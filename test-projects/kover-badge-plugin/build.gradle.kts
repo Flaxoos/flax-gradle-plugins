@@ -8,7 +8,7 @@ plugins {
     id("io.flax.plugin-test-project-conventions")
     alias(libs.plugins.kotlin)
     alias(libs.plugins.kotlinxKover)
-    id("io.flax.kover-badge")
+    id("io.github.flax.kover-badge")
 }
 
 pluginTestProject {
