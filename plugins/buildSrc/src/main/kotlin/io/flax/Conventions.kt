@@ -64,7 +64,7 @@ open class Conventions : Plugin<Project> {
             }
             val extenstion = project.extensions.create("conventions", ConventionExtension::class.java)
 
-            group = "io.flax"
+            group = "io.github.flax"
 
             repositories {
                 google()
