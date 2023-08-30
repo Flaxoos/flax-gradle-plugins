@@ -13,7 +13,7 @@ the Kover Gradle Plugin. This badge is generated using the https://shields.io/ba
 ```kotlin
 plugins {
     id("org.jetbrains.kotlinx.kover") version [kover_version]
-    id("io.flax.kover.kover-badge") version [kover_badge_version]
+    id("io.github.flax.kover-badge") version [kover_badge_version]
 }
 ```
 - Create a readme file
