@@ -1,5 +1,6 @@
 package io.github.flaxoos
 
+import com.github.jengelman.gradle.plugins.shadow.ShadowJavaPlugin.SHADOW_JAR_TASK_NAME
 import com.gradle.publish.PublishPlugin
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
@@ -9,6 +10,7 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.plugins.JvmTestSuitePlugin
 import org.gradle.api.plugins.catalog.VersionCatalogPlugin
 import org.gradle.api.plugins.jvm.JvmTestSuite
@@ -86,6 +88,8 @@ open class Conventions : Plugin<Project> {
 
             setupTestSuites()
 
+            setupJar()
+
             configureKover()
 
             configureKtlint()
@@ -126,6 +130,7 @@ private fun Project.setupKotlin() {
     }
 }
 
+@Suppress("UnstableApiUsage")
 private fun Project.setupTestSuites() {
     the<TestingExtension>().apply {
         listOf(INTEGRATION_TEST_SUITE_NAME, FUNCTIONAL_TEST_SUITE_NAME).map { testSuiteName ->
@@ -155,10 +160,6 @@ private fun Project.setupTestSuites() {
                     names(testSuite.get().sources.name)
                 }
             }
-
-            tasks.named("shadowJar", AbstractArchiveTask::class.java) {
-                this.archiveClassifier.set(provider { null })
-            }
         }
 
         // Add testing framework
@@ -173,6 +174,16 @@ private fun Project.setupTestSuites() {
     }
     tasks.withType(Test::class) {
         useJUnitPlatform()
+    }
+}
+
+private fun Project.setupJar() {
+    the<JavaPluginExtension>().apply {
+        withJavadocJar()
+        withSourcesJar()
+        tasks.named(SHADOW_JAR_TASK_NAME, AbstractArchiveTask::class.java) {
+            this.archiveClassifier.set(provider { null })
+        }
     }
 }
 
