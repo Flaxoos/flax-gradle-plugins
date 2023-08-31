@@ -38,7 +38,7 @@ shadow = "8.1.1"
 # Core libraries
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx_coroutines" }
-kotlin-gradleDsl = { module= "org.gradle.kotlin:gradle-kotlin-dsl-plugins", version.ref = "kotlin-gradleDsl"}
+kotlin-gradleDsl = { module = "org.gradle.kotlin:gradle-kotlin-dsl-plugins", version.ref = "kotlin-gradleDsl" }
 
 # Testing libraries
 kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
@@ -57,9 +57,11 @@ loggingCapabilities-gradlePlugin = { module = "dev.jacomet.gradle.plugins:loggin
 # Additional plugins
 kover-gradlePlugin = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", version.ref = "kover" }
 atomicfu-gradlePlugin = { module = "org.jetbrains.kotlinx:atomicfu-gradle-plugin", version.ref = "atomicFu" }
-detekt-gradlePlugin = { module =  "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
+detekt-gradlePlugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 version-gradlePlugin = { module = "com.github.ben-manes:gradle-versions-plugin", version.ref = "versionCheck" }
-gradlePublishPlugin-gradlePlugin = { module = "com.gradle.publish:plugin-publish-plugin", version.ref = "gradlePublishPlugin"}
+gradlePublishPlugin-gradlePlugin = { module = "com.gradle.publish:plugin-publish-plugin", version.ref = "gradlePublishPlugin" }
+shadow-gradlePlugin = { module = "com.github.johnrengelman:shadow", version.ref = "shadow" }
+
 # Other libraries
 kotlinCssLib = { module = "org.jetbrains.kotlin-wrappers:kotlin-css", version.ref = "kotlin-css" }
 konform = { module = "io.konform:konform", version.ref = "konform" }

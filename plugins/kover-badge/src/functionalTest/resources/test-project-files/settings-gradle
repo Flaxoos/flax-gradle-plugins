@@ -1,0 +1,16 @@
+rootProject.name = "kover-badge-test"
+
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+@Suppress("UnstableApiUsage")
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+        google()
+    }
+}

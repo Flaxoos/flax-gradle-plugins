@@ -27,5 +27,5 @@ gradleEnterprise {
 }
 
 rootProject.name = "flax-gradle-plugins"
-include(":test-projects:kover-badge-plugin")
+include(":test-projects:kover-badge")
 includeBuild("plugins")

@@ -23,6 +23,8 @@ dependencies {
     implementation(libs.detekt.gradlePlugin)
     implementation(libs.version.gradlePlugin)
     implementation(libs.gradlePublishPlugin.gradlePlugin)
+    implementation(libs.shadow.gradlePlugin)
+
 
     testImplementation(libs.mockk)
 }
@@ -41,11 +43,11 @@ gradlePlugin {
     plugins {
         create("conventions") {
             id = "conventions"
-            implementationClass = "io.flax.Conventions"
+            implementationClass = "io.github.flaxoos.Conventions"
         }
         create("kover-gradle-testkit") {
-            id = "io.flax.kover-gradle-testkit"
-            implementationClass = "io.flax.kover.gradle.testkit.KoverGradleTestKitPlugin"
+            id = "io.github.flaxoos.kover-gradle-testkit"
+            implementationClass = "io.github.flaxoos.kover.gradle.testkit.KoverGradleTestKitPlugin"
         }
     }
 }

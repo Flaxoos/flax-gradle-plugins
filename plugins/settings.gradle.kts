@@ -33,5 +33,5 @@ gradleEnterprise {
 }
 
 rootProject.name = "plugins"
-include(":kover-badge-plugin")
+include(":kover-badge")
 include(":common")
