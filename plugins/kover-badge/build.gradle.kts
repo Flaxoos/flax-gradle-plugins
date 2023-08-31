@@ -25,6 +25,6 @@ koverGradleTestKit {
 
 conventions {
     // overriding the convention, until koverGradleTestKit works properly
-    minimunCoverage.set(40)
+    minimumCoverage.set(40)
     pluginTags.set(listOf("kover", "badge", "shields", "shields.io", "coverage", "kotlin"))
 }

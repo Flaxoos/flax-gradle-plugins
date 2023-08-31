@@ -1,6 +1,5 @@
 package io.github.flaxoos
 
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.gradle.publish.PublishPlugin
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
@@ -43,7 +42,7 @@ const val INTEGRATION_TEST_SUITE_NAME = "integrationTest"
 const val FUNCTIONAL_TEST_SUITE_NAME = "functionalTest"
 
 abstract class ConventionExtension @Inject constructor(objectFactory: ObjectFactory) {
-    val minimunCoverage: Property<Int> = objectFactory.property(Int::class.java).convention(90)
+    val minimumCoverage: Property<Int> = objectFactory.property(Int::class.java).convention(90)
     val pluginTags: ListProperty<String> = objectFactory.listProperty(String::class.java)
 }
 
@@ -209,7 +208,7 @@ private fun Project.configureKover() {
                 rule {
                     isEnabled = true
                     afterEvaluate {
-                        minBound(the(ConventionExtension::class).minimunCoverage.get())
+                        minBound(the(ConventionExtension::class).minimumCoverage.get())
                     }
                 }
                 onCheck = true
