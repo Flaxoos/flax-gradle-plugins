@@ -99,7 +99,7 @@ open class Conventions : Plugin<Project> {
                     }
                 },
                 name = project.name,
-                tags = extenstion.pluginTags.get().toTypedArray(),
+                tags = extenstion.pluginTags,
             )
 
             setupPublishing(project)
@@ -178,17 +178,19 @@ private fun Project.setupTestSuites() {
 
 
 @Suppress("UnstableApiUsage")
-fun Project.setupGradlePlugin(name: String, testSourceSets: List<Provider<SourceSet>>, vararg tags: String) {
+fun Project.setupGradlePlugin(name: String, testSourceSets: List<Provider<SourceSet>>, tags: ListProperty<String>) {
     the<GradlePluginDevelopmentExtension>().apply {
         website.set("https://github.com/flaxoos/flax-gradle-plugins")
         vcsUrl.set("https://github.com/flaxoos/flax-gradle-plugins")
         plugins {
-            create("$group.$name") {
-                id = property("ID").toString()
-                implementationClass = property("IMPLEMENTATION_CLASS").toString()
-                description = property("DESCRIPTION").toString()
-                displayName = property("DISPLAY_NAME").toString()
-                this.tags.set(tags.toList())
+            afterEvaluate {
+                create("$group.$name") {
+                    id = property("ID").toString()
+                    implementationClass = property("IMPLEMENTATION_CLASS").toString()
+                    description = property("DESCRIPTION").toString()
+                    displayName = property("DISPLAY_NAME").toString()
+                    this.tags.set(tags.get())
+                }
             }
         }
         testSourceSets(*testSourceSets.map { it.get() }.toTypedArray())

@@ -1,4 +1,4 @@
-rootProject.name = "kover-badge-plugin-test"
+rootProject.name = "kover-badge-test"
 
 pluginManagement {
     repositories {

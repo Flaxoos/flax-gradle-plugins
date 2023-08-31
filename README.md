@@ -8,10 +8,10 @@ This repository hosts a collection of custom Gradle plugins aimed at enhancing v
 
 ## Available Plugins 🛠️
 
-### [Kover Badge Plugin](kover-badge-plugin/README.md)
+### [Kover Badge Plugin](kover-badge/README.md)
 
 - **Description**: Designed to embed a test coverage badge in your project's README. The badge is generated based on coverage information from the Kover Gradle Plugin, and displayed using the https://shields.io/badges service.
-- **Usage**: For details, check out the [plugin's README](plugins/kover-badge-plugin/README.md).
+- **Usage**: For details, check out the [plugin's README](plugins/kover-badge/README.md).
 
 ## Test Project 🧪
 
