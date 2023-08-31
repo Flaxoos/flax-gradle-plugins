@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm")
 }
 
-group = "io.flax"
+group = "io.github.flaxoos"
 
 kotlin {
     jvmToolchain(libs.versions.java.get().toInt())

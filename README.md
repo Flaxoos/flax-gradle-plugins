@@ -1,7 +1,7 @@
 # Flax Gradle Plugins
 Bespoke Gradle Plugins
 
-![Language](https://img.shields.io/github/languages/top/idoflax/flax-gradle-plugins?color=blue&logo=kotlin)
+![Language](https://img.shields.io/github/languages/top/flaxoos/flax-gradle-plugins?color=blue&logo=kotlin)
 
 This repository hosts a collection of custom Gradle plugins aimed at enhancing various aspects of software development. It's a monorepo structured with sub-projects for each specific plugin. In addition, there's a `test-project` folder that serves as a playground for applying and testing these plugins.
 

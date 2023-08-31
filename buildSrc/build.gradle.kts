@@ -20,8 +20,8 @@ repositories {
 gradlePlugin {
     plugins {
         create("plugin-test-project-conventions") {
-            id = "io.flax.plugin-test-project-conventions"
-            implementationClass = "io.flax.PluginTestProjectConventions"
+            id = "io.github.flaxoos.plugin-test-project-conventions"
+            implementationClass = "io.github.flaxoos.PluginTestProjectConventions"
         }
     }
 }
