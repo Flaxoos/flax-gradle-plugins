@@ -257,7 +257,7 @@ private fun Project.setupPublishing(project: Project) {
                 name = "GitHubPackages"
                 url =
                     URI("https://maven.pkg.github.com/flaxoos/${project.findProperty("github.repository.name") ?: project.name}")
-                gprCredentials()
+                gprWriteCredentials()
             }
             mavenLocal()
         }
@@ -303,15 +303,26 @@ private fun runCommands(vararg commands: String): String {
 }
 
 context(Project)
-private fun MavenArtifactRepository.gprCredentials() {
+private fun MavenArtifactRepository.gprWriteCredentials() {
     credentials {
         username = gprUser
-        password = gprToken
+        password = gprWriteToken
     }
 }
 
-private val Project.gprToken
-    get() = findProperty("gpr.key") as String? ?: System.getenv("GPR_TOKEN")
+context(Project)
+private fun MavenArtifactRepository.gprReadCredentials() {
+    credentials {
+        username = gprUser
+        password = gprReadToken
+    }
+}
+
+private val Project.gprWriteToken
+    get() = findProperty("gpr.write.key") as String? ?: System.getenv("GPR_WRITE_TOKEN")
+
+private val Project.gprReadToken
+    get() = findProperty("gpr.read.key") as String? ?: System.getenv("GPR_READ_TOKEN")
 
 private val Project.gprUser
     get() = findProperty("gpr.user") as String? ?: System.getenv("GPR_USER")

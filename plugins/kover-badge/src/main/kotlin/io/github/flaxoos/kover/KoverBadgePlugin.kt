@@ -90,12 +90,12 @@ class KoverBadgePlugin @Inject constructor(val objects: ObjectFactory) : Plugin<
         extension: KoverBadgePluginExtension,
     ) {
         coverageLogFile.set(
-            objects.fileProperty().fileProvider(project.provider { koverLogTask.outputs.files.singleFile })
+            objects.fileProperty().fileProvider(project.provider { koverLogTask.outputs.files.singleFile }),
         )
 
         koverHtmlReportTask?.let {
             coverageHtmlReportDir.set(
-                objects.directoryProperty().fileProvider(project.provider { it.outputs.files.singleFile })
+                objects.directoryProperty().fileProvider(project.provider { it.outputs.files.singleFile }),
             )
         }
 
