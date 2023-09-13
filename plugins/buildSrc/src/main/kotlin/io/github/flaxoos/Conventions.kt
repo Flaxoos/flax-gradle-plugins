@@ -160,6 +160,10 @@ private fun Project.setupTestSuites() {
                     names(testSuite.get().sources.name)
                 }
             }
+
+            tasks.named("shadowJar", AbstractArchiveTask::class.java) {
+                this.archiveClassifier.set(provider { null })
+            }
         }
 
         // Add testing framework
