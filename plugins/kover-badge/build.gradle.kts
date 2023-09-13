@@ -1,5 +1,4 @@
 import io.github.flaxoos.FUNCTIONAL_TEST_SUITE_NAME
-import io.github.flaxoos.plugin
 
 plugins {
     id("conventions")

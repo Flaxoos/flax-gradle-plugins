@@ -1,12 +1,15 @@
+@file:Suppress("TooManyFunctions")
+
 package io.github.flaxoos
 
-import com.github.jengelman.gradle.plugins.shadow.ShadowJavaPlugin.SHADOW_JAR_TASK_NAME
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.gradle.publish.PublishPlugin
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
 import kotlinx.kover.gradle.plugin.dsl.KoverReportExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.VersionCatalog
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.model.ObjectFactory
@@ -21,7 +24,6 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.wrapper.Wrapper
 import org.gradle.kotlin.dsl.apply
@@ -38,13 +40,16 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import org.jetbrains.kotlin.gradle.utils.IMPLEMENTATION
 import java.net.URI
+import java.util.Optional
 import javax.inject.Inject
 
 const val INTEGRATION_TEST_SUITE_NAME = "integrationTest"
 const val FUNCTIONAL_TEST_SUITE_NAME = "functionalTest"
 
+private const val DEFAULT_MIN_COVERAGE = 90
+
 abstract class ConventionExtension @Inject constructor(objectFactory: ObjectFactory) {
-    val minimumCoverage: Property<Int> = objectFactory.property(Int::class.java).convention(90)
+    val minimumCoverage: Property<Int> = objectFactory.property(Int::class.java).convention(DEFAULT_MIN_COVERAGE)
     val pluginTags: ListProperty<String> = objectFactory.listProperty(String::class.java)
 }
 
@@ -161,7 +166,7 @@ private fun Project.setupTestSuites() {
                 }
             }
 
-            tasks.named("shadowJar", AbstractArchiveTask::class.java) {
+            tasks.withType(ShadowJar::class) {
                 this.archiveClassifier.set(provider { null })
             }
         }
@@ -185,7 +190,8 @@ private fun Project.setupJar() {
     the<JavaPluginExtension>().apply {
         withJavadocJar()
         withSourcesJar()
-        tasks.named(SHADOW_JAR_TASK_NAME, AbstractArchiveTask::class.java) {
+        tasks.withType(ShadowJar::class) {
+            exclude("org/gradle/**")
             this.archiveClassifier.set(provider { null })
         }
     }
@@ -208,11 +214,10 @@ fun Project.setupGradlePlugin(name: String, testSourceSets: List<Provider<Source
                 }
             }
         }
+        @Suppress("SpreadOperator")
         testSourceSets(*testSourceSets.map { it.get() }.toTypedArray())
         pluginSourceSet(
-            the<SourceSetContainer>().let {
-                it.named("main").get()
-            },
+            the<SourceSetContainer>().named("main").get(),
         )
     }
 }
@@ -260,7 +265,11 @@ private fun Project.setupPublishing(project: Project) {
             maven {
                 name = "GitHubPackages"
                 url =
-                    URI("https://maven.pkg.github.com/flaxoos/${project.findProperty("github.repository.name") ?: project.name}")
+                    URI(
+                        "https://maven.pkg.github.com/flaxoos/${
+                            project.findProperty("github.repository.name") ?: project.name
+                        }",
+                    )
                 gprWriteCredentials()
             }
             mavenLocal()
@@ -277,6 +286,7 @@ private fun Project.setupPublishing(project: Project) {
 /**
  * Deletes the current tag and recreates it
  */
+@Suppress("TooGenericExceptionCaught")
 private fun Project.createReleaseTag() {
     val tagName = "release/$version"
     try {
@@ -284,7 +294,7 @@ private fun Project.createReleaseTag() {
     } catch (e: Exception) {
         logger.warn(
             "Failed deleting release tag. if the tag $tagName doesn't exist then this is expected. " +
-                    e.message,
+                e.message,
         )
     }
     runCommands("git", "status")
@@ -315,6 +325,7 @@ private fun MavenArtifactRepository.gprWriteCredentials() {
 }
 
 context(Project)
+@Suppress("UnusedPrivateMember", "UNUSED")
 private fun MavenArtifactRepository.gprReadCredentials() {
     credentials {
         username = gprUser
@@ -331,7 +342,7 @@ private val Project.gprReadToken
 private val Project.gprUser
     get() = findProperty("gpr.user") as String? ?: System.getenv("GPR_USER")
 
-fun Project.libs() = project.the<VersionCatalogsExtension>().find("libs")
+fun Project.libs(): Optional<VersionCatalog> = project.the<VersionCatalogsExtension>().find("libs")
 
 fun Project.versionOf(version: String): String =
     this.libs().get().findVersion(version).get().toString()
@@ -341,7 +352,3 @@ fun Project.library(name: String): String =
 
 fun Project.plugin(name: String): String =
     this.libs().get().findPlugin(name).get().get().pluginId
-
-@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER)
-@Retention(AnnotationRetention.RUNTIME)
-annotation class KoverIgnore
