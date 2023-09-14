@@ -30,6 +30,6 @@ jobs:
           GPR_USER: ${{ env.GPR_USER }}
           GPR_READ_TOKEN: ${{ secrets.GPR_READ_TOKEN }}
           GPR_WRITE_TOKEN: ${{ secrets.GPR_WRITE_TOKEN }}
-          GRADLE_PUBLISH_KEY: ${{ env.GRADLE_PUBLISH_KEY }}
+          GRADLE_PUBLISH_KEY: ${{ secrets.GRADLE_PUBLISH_KEY }}
           GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}
         run: ./gradlew test-projects:kover-badge:acceptPlugin :plugins:kover-badge:publish :plugins:kover-badge:publishPlugins
